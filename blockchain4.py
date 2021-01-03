@@ -10,6 +10,7 @@ def get_last_blockchain_value():
         return None
     return blockchain[-1]
 
+# ----------------------------------------------------
 # Add transaction appending to the open_transactions
 def add_transaction(recipient, sender=owner, amount=1.0):
     """
@@ -21,10 +22,12 @@ def add_transaction(recipient, sender=owner, amount=1.0):
     transaction = {'sender': sender, 'recipient': recipient, 'amount': amount}
     open_transactions.append(transaction)
 
+# ----------------------------------------------------
 # function to create hashed block
 def create_hash_block(block):
     return '-'.join([str(block[key]) for key in block])   
 
+# ----------------------------------------------------
 #  create a block with the open_transactions and add it to the blockchain
 def mine_block():
     last_block = blockchain[-1]
@@ -37,6 +40,8 @@ def mine_block():
     }
     blockchain.append(block)
 
+# ----------------------------------------------------
+# Functions to get the inputs that the user write
 def get_transaction_value():
     tx_recipient = input('Enter the recipient of the transaction: ')
     tx_amount = input('Enter the amount of the transaction: ')
@@ -46,12 +51,16 @@ def get_transaction_value():
 def get_user_choice():
     user_input = input('Your choice: ')
     return user_input
+# ----------------------------------------------------
 
+# ----------------------------------------------------
+# Hacer un print de todos los bloques del blockchain
 def print_blockchain_blocks():
     for block in blockchain:
         print('Outputting block')
         print(block)
 
+# ----------------------------------------------------
 # Comprueba que el primer valor de la segunda blockchain coincide con el valor de la blockchain previa
 def verify_chain():
     # usando la funcion enumerate para una lista te da el index por cada elemento(bloque en este caso) de la misma
@@ -64,7 +73,7 @@ def verify_chain():
     return True    
 
 # ----------------------------------------------------
-
+# variable to finish the while loop
 waiting_for_input = True
 
 # while loop
