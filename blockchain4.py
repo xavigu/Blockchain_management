@@ -1,3 +1,5 @@
+MINING_REWARD = 10
+
 genesis_block = {'previous_hash': '', 'index': 0, 'transactions': []}
 blockchain = [genesis_block]
 open_transactions = []
@@ -55,6 +57,12 @@ def mine_block():
     last_block = blockchain[-1]
     # el previous_hash será el ultimo block del blockchain pasado a string y separado los valores del dictionary por '-'
     hashed_block = create_hash_block(last_block)
+    reward_transaction = {
+        'sender': 'MINING',
+        'recipient': owner,
+        'amount': MINING_REWARD
+    }
+    open_transactions.append(reward_transaction)
     block = {
         'previous_hash': hashed_block, 
         'index': len(blockchain), 
