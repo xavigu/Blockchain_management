@@ -1,6 +1,10 @@
 MINING_REWARD = 10
 
-genesis_block = {'previous_hash': '', 'index': 0, 'transactions': []}
+genesis_block = {
+    'previous_hash': '', 
+    'index': 0, 
+    'transactions': []
+}
 blockchain = [genesis_block]
 open_transactions = []
 owner = 'Javier'
@@ -17,17 +21,26 @@ def get_last_blockchain_value():
 # ----------------------------------------------------
 # Add transaction appending to the open_transactions
 def add_transaction(recipient, sender=owner, amount=1.0):
-    """
-     Arguments:
-       :sender: The sender of the coins
-       :recipient: The recipient of the coins
-       :amount: The amount of coins sent with the transactions
-    """
-    transaction = {'sender': sender, 'recipient': recipient, 'amount': amount}
-    open_transactions.append(transaction)
-    # Add the participants into the set (automatically ignore a value if is duplicated)
-    participants.add(sender)
-    participants.add(recipient)
+    transaction = {
+        'sender': sender, 
+        'recipient': recipient, 
+        'amount': amount
+    }
+    if verify_transaction(transaction):
+        open_transactions.append(transaction)
+        # Add the participants into the set (automatically ignore a value if is duplicated)
+        participants.add(sender)
+        participants.add(recipient)
+        return True
+    return False
+
+# ----------------------------------------------------
+# Function to verify if a transaction is possible
+def verify_transaction(transaction):
+    sender_balance = get_balance(transaction['sender'])
+    # return true if the sender_balance is greater than the transaction amount otherwise false
+    return sender_balance >= transaction['amount']
+
 
 # ----------------------------------------------------
 # function to create hashed block
@@ -38,7 +51,9 @@ def create_hash_block(block):
 # function to calculate the balance amount of a participant
 def get_balance(participant):
     # nested list comprehensions to get the transactions where the participant is the sender
-    tx_sender = [[tx['amount'] for tx in block['transactions'] if tx['sender'] == participant ] for block in blockchain]
+    tx_sender = [[tx['amount'] for tx in block['transactions'] if tx['sender'] == participant] for block in blockchain]
+    open_tx_sender = [tx['amount'] for tx in open_transactions if tx['sender'] == participant]
+    tx_sender.append(open_tx_sender)
     amount_sent = 0
     for tx in tx_sender:
         if len(tx) > 0:
@@ -69,6 +84,7 @@ def mine_block():
         'transactions': open_transactions
     }
     blockchain.append(block)
+    return True
 
 # ----------------------------------------------------
 # Functions to get the inputs that the user write
@@ -89,6 +105,8 @@ def print_blockchain_blocks():
     for block in blockchain:
         print('Outputting block')
         print(block)
+    else:
+        print('-' * 20)
 
 def print_participants():
     print('Participants list: ', participants)
@@ -123,7 +141,10 @@ while waiting_for_input:
     if user_choice == '1':  
         tx_data = get_transaction_value()
         recipient, amount = tx_data
-        add_transaction(recipient, amount=amount)
+        if add_transaction(recipient, amount=amount):
+            print('Added transaction!')
+        else:
+            print('Transaction failed!')
         print(open_transactions)
     elif user_choice == '2':
         print_blockchain_blocks()
@@ -143,9 +164,7 @@ while waiting_for_input:
         print_blockchain_blocks()
         print('The blockchain was modified, Invalid!')
         break
-    print(get_balance('Javier'))
-
-        
+    print('Balance amount:', get_balance('Javier'))
 
 
 
