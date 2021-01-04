@@ -33,6 +33,23 @@ def create_hash_block(block):
     return '-'.join([str(block[key]) for key in block])   
 
 # ----------------------------------------------------
+# function to calculate the balance amount of a participant
+def get_balance(participant):
+    # nested list comprehensions to get the transactions where the participant is the sender
+    tx_sender = [[tx['amount'] for tx in block['transactions'] if tx['sender'] == participant ] for block in blockchain]
+    amount_sent = 0
+    for tx in tx_sender:
+        if len(tx) > 0:
+            amount_sent += tx[0]
+    # nested list comprehensions to get the transactions where the participant is the recipient
+    tx_recipient = [[tx['amount'] for tx in block['transactions'] if tx['recipient'] == participant ] for block in blockchain]
+    amount_received = 0
+    for tx in tx_recipient:
+        if len(tx) > 0:
+            amount_received += tx[0]
+    return amount_received - amount_sent
+
+# ----------------------------------------------------
 #  create a block with the open_transactions and add it to the blockchain
 def mine_block():
     last_block = blockchain[-1]
@@ -49,7 +66,7 @@ def mine_block():
 # Functions to get the inputs that the user write
 def get_transaction_value():
     tx_recipient = input('Enter the recipient of the transaction: ')
-    tx_amount = input('Enter the amount of the transaction: ')
+    tx_amount = float(input('Enter the amount of the transaction: '))
     # return a tuple
     return (tx_recipient, tx_amount)
 
@@ -67,7 +84,6 @@ def print_blockchain_blocks():
 
 def print_participants():
     print('Participants list: ', participants)
-
 
 
 # ----------------------------------------------------
@@ -104,7 +120,8 @@ while waiting_for_input:
     elif user_choice == '2':
         print_blockchain_blocks()
     elif user_choice == '3':
-        mine_block()
+        if mine_block():
+            open_transactions = []
     elif user_choice == '4':
         print_participants()
     elif user_choice == 'e':
@@ -118,6 +135,7 @@ while waiting_for_input:
         print_blockchain_blocks()
         print('The blockchain was modified, Invalid!')
         break
+    print(get_balance('Javier'))
 
         
 
