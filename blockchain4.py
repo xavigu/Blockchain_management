@@ -45,13 +45,32 @@ def verify_transaction(transaction):
     # return true if the sender_balance is greater than the transaction amount otherwise false
     return sender_balance >= transaction['amount']
 
-
+    
 # ----------------------------------------------------
 # function to create hashed block
 def create_hash_block(block):
     # hash the block and convert to string with json library and encode to utf-8 and hexdigest to have normal characters
     hash_block = hashlib.sha256(json.dumps(block).encode()).hexdigest()
     return hash_block
+
+# ----------------------------------------------------
+# function to create a new hash using the transactions, the hash of the last block and a proof number
+def valid_proof(transactions, last_hash, proof):
+    guess = (str(transactions) + str(last_hash) + str(proof)).encode()
+    guess_hash = hashlib.sha256(guess).hexdigest()
+    print(guess_hash)
+    # check if the hash start with two zeros at the beginning to return true(valid)
+    return guess_hash[0:2] == '00'
+
+# ----------------------------------------------------
+# function to get a new proof value
+def proof_of_work():
+    # get the first list element from the right
+    last_block = blockchain[-1]
+    last_hash = create_hash_block(last_block)
+    while valid_proof(open_transactions, last_hash, proof):
+        proof += 1
+    return proof    
 
 # ----------------------------------------------------
 # function to calculate the balance amount of a participant
