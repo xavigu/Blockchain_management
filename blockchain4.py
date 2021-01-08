@@ -1,5 +1,6 @@
-
 import functools
+import hashlib
+import json
 
 MINING_REWARD = 10
 
@@ -48,7 +49,9 @@ def verify_transaction(transaction):
 # ----------------------------------------------------
 # function to create hashed block
 def create_hash_block(block):
-    return '-'.join([str(block[key]) for key in block])   
+    # hash the block and convert to string with json library and encode to utf-8 and hexdigest to have normal characters
+    hash_block = hashlib.sha256(json.dumps(block).encode()).hexdigest()
+    return hash_block
 
 # ----------------------------------------------------
 # function to calculate the balance amount of a participant
@@ -77,6 +80,7 @@ def mine_block():
     last_block = blockchain[-1]
     # el previous_hash será el ultimo block del blockchain pasado a string y separado los valores del dictionary por '-'
     hashed_block = create_hash_block(last_block)
+    print(hashed_block)
     reward_transaction = {
         'sender': 'MINING',
         'recipient': owner,
