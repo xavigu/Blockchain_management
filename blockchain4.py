@@ -7,7 +7,8 @@ MINING_REWARD = 10
 genesis_block = {
     'previous_hash': '', 
     'index': 0, 
-    'transactions': []
+    'transactions': [],
+    'proof': 100
 }
 blockchain = [genesis_block]
 open_transactions = []
@@ -45,7 +46,7 @@ def verify_transaction(transaction):
     # return true if the sender_balance is greater than the transaction amount otherwise false
     return sender_balance >= transaction['amount']
 
-    
+
 # ----------------------------------------------------
 # function to create hashed block
 def create_hash_block(block):
@@ -68,7 +69,8 @@ def proof_of_work():
     # get the first list element from the right
     last_block = blockchain[-1]
     last_hash = create_hash_block(last_block)
-    while valid_proof(open_transactions, last_hash, proof):
+    proof = 0
+    while not valid_proof(open_transactions, last_hash, proof):
         proof += 1
     return proof    
 
@@ -99,6 +101,8 @@ def mine_block():
     last_block = blockchain[-1]
     # el previous_hash será el ultimo block del blockchain pasado a string y separado los valores del dictionary por '-'
     hashed_block = create_hash_block(last_block)
+    # give a new proof value to the current transaction
+    proof = proof_of_work()
     print(hashed_block)
     reward_transaction = {
         'sender': 'MINING',
@@ -111,7 +115,8 @@ def mine_block():
     block = {
         'previous_hash': hashed_block, 
         'index': len(blockchain), 
-        'transactions': copied_transactions
+        'transactions': copied_transactions,
+        'proof': proof
     }
     blockchain.append(block)
     return True
@@ -151,6 +156,10 @@ def verify_chain():
             continue
         # compara el valor del previous_hash de un block con la creación de un hash_block del bloque anterior
         if block['previous_hash'] != create_hash_block(blockchain[index - 1]):
+            return False
+        # comprobar que es un valid proof quitando antes del bloque el ultimo valor que corresponde a las reward transaction    
+        if not valid_proof(block['transactions'][:-1], block['previous_hash'], block['proof']):
+            print('Proof of work is invalid!')
             return False
     return True    
 
