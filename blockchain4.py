@@ -1,4 +1,4 @@
-import functools
+from functools import reduce
 import hashlib
 import json
 
@@ -60,14 +60,14 @@ def get_balance(participant):
     tx_sender = [[tx['amount'] for tx in block['transactions'] if tx['sender'] == participant] for block in blockchain]
     open_tx_sender = [tx['amount'] for tx in open_transactions if tx['sender'] == participant]
     tx_sender.append(open_tx_sender)
-    amount_sent = functools.reduce(lambda tx_sum, tx_amt: tx_sum + sum(tx_amt) if len(tx_amt) > 0 else tx_sum + 0, tx_sender, 0)
+    amount_sent = reduce(lambda tx_sum, tx_amt: tx_sum + sum(tx_amt) if len(tx_amt) > 0 else tx_sum + 0, tx_sender, 0)
     # amount_sent = 0
     # for tx in tx_sender:
     #     if len(tx) > 0:
     #         amount_sent += tx[0]
     # nested list comprehensions to get the transactions where the participant is the recipient
     tx_recipient = [[tx['amount'] for tx in block['transactions'] if tx['recipient'] == participant ] for block in blockchain]
-    amount_received = functools.reduce(lambda tx_sum, tx_amt: tx_sum + sum(tx_amt) if len(tx_amt) > 0 else tx_sum + 0, tx_recipient, 0)
+    amount_received = reduce(lambda tx_sum, tx_amt: tx_sum + sum(tx_amt) if len(tx_amt) > 0 else tx_sum + 0, tx_recipient, 0)
     # amount_received = 0
     # for tx in tx_recipient:
     #     if len(tx) > 0:
