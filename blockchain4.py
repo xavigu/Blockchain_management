@@ -1,4 +1,5 @@
 from functools import reduce
+from collections import OrderedDict
 import hashlib
 import json
 
@@ -26,11 +27,14 @@ def get_last_blockchain_value():
 # ----------------------------------------------------
 # Add transaction appending to the open_transactions
 def add_transaction(recipient, sender=owner, amount=1.0):
-    transaction = {
-        'sender': sender, 
-        'recipient': recipient, 
-        'amount': amount
-    }
+    # transaction = {
+    #     'sender': sender, 
+    #     'recipient': recipient, 
+    #     'amount': amount
+    # }
+
+    # library to create a dictionary with an order usin list of tuples (key-value)
+    transaction = OrderedDict([('sender', sender),('recipient', recipient),('amount', amount)])
     if verify_transaction(transaction):
         open_transactions.append(transaction)
         # Add the participants into the set (automatically ignore a value if is duplicated)
@@ -51,7 +55,8 @@ def verify_transaction(transaction):
 # function to create hashed block
 def create_hash_block(block):
     # hash the block and convert to string with json library and encode to utf-8 and hexdigest to have normal characters
-    hash_block = hashlib.sha256(json.dumps(block).encode()).hexdigest()
+    # Because a dictionary is unordered, we order the keys before convert the block to string
+    hash_block = hashlib.sha256(json.dumps(block, sort_keys=True).encode()).hexdigest()
     return hash_block
 
 # ----------------------------------------------------
@@ -104,11 +109,12 @@ def mine_block():
     # give a new proof value to the current transaction
     proof = proof_of_work()
     print(hashed_block)
-    reward_transaction = {
-        'sender': 'MINING',
-        'recipient': owner,
-        'amount': MINING_REWARD
-    }
+    # reward_transaction = {
+    #     'sender': 'MINING',
+    #     'recipient': owner,
+    #     'amount': MINING_REWARD
+    # }
+    reward_transaction = OrderedDict([('sender', 'MINING'),('recipient', owner),('amount', MINING_REWARD)])
     # create a copy of open transactions to dont modified when we append the reward transaction
     copied_transactions = open_transactions[:]
     copied_transactions.append(reward_transaction)
