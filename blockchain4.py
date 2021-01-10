@@ -1,7 +1,8 @@
 from functools import reduce
 from collections import OrderedDict
 import hashlib
-import json
+
+from hash_util import hash_string_256, create_hash_block
 
 MINING_REWARD = 10
 
@@ -52,18 +53,10 @@ def verify_transaction(transaction):
 
 
 # ----------------------------------------------------
-# function to create hashed block
-def create_hash_block(block):
-    # hash the block and convert to string with json library and encode to utf-8 and hexdigest to have normal characters
-    # Because a dictionary is unordered, we order the keys before convert the block to string
-    hash_block = hashlib.sha256(json.dumps(block, sort_keys=True).encode()).hexdigest()
-    return hash_block
-
-# ----------------------------------------------------
 # function to create a new hash using the transactions, the hash of the last block and a proof number
 def valid_proof(transactions, last_hash, proof):
     guess = (str(transactions) + str(last_hash) + str(proof)).encode()
-    guess_hash = hashlib.sha256(guess).hexdigest()
+    guess_hash = hash_string_256(guess)
     print(guess_hash)
     # check if the hash start with two zeros at the beginning to return true(valid)
     return guess_hash[0:2] == '00'
