@@ -41,7 +41,7 @@ def load_data():
                         [('sender', tx['sender']),('recipient', tx['recipient']),('amount', tx['amount'])])
                 updated_transactions.append(updated_transaction) 
             open_transactions = updated_transactions
-    except IOError:
+    except (IOError, IndexError):
         genesis_block = {
             'previous_hash': '', 
             'index': 0, 
