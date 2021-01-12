@@ -18,6 +18,25 @@ owner = 'Javier'
 # create a set to the participants of the transactions
 participants = {'Javier'}
 
+# load transactions data of a file
+def load_data():
+    with open('blockchain.txt', mode='r') as f:
+        global blockchain
+        global open_transactions 
+        file_content = f.readlines()
+        blockchain = file_content[0]
+        open_transactions = file_content[1]
+
+# execute inmediatelly the load_data when we run the script
+load_data()
+
+# save transactions data in a file
+def save_data():
+    with open('blockchain.txt', mode='w') as f:
+        f.write(str(blockchain))
+        f.write('\n')
+        f.write(str(open_transactions))
+
 # Extraer el ultimo valor que tiene el blockchain
 # En una lista utilizando -1 accedes al valor que este más a la izquierda de la lista/array y no da error si esta vacio 
 def get_last_blockchain_value():
@@ -41,6 +60,7 @@ def add_transaction(recipient, sender=owner, amount=1.0):
         # Add the participants into the set (automatically ignore a value if is duplicated)
         participants.add(sender)
         participants.add(recipient)
+        save_data()
         return True
     return False
 
@@ -118,6 +138,7 @@ def mine_block():
         'proof': proof
     }
     blockchain.append(block)
+    save_data()
     return True
 
 # ----------------------------------------------------
