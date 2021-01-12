@@ -1,6 +1,7 @@
 from functools import reduce
 from collections import OrderedDict
 import hashlib
+import json
 
 from hash_util import hash_string_256, create_hash_block
 
@@ -24,8 +25,27 @@ def load_data():
         global blockchain
         global open_transactions 
         file_content = f.readlines()
-        blockchain = file_content[0]
-        open_transactions = file_content[1]
+        # blockchain logic 
+        blockchain = json.loads(file_content[0][:-1])
+        updated_blockchain = []
+        for block in blockchain:
+           updated_block = {
+             'previous_hash': block['previous_hash'], 
+             'index': block['index'], 
+             'proof':block['proof'],
+             'transactions': [OrderedDict(
+                 [('sender', tx['sender']),('recipient', tx['recipient']),('amount', tx['amount'])]) for tx in block['transactions']]
+           }
+           updated_blockchain.append(updated_block) 
+        blockchain = updated_blockchain
+        # open_transactions logic
+        open_transactions = json.loads(file_content[1])
+        updated_transactions = []
+        for tx in open_transactions:
+           updated_transaction = OrderedDict(
+                 [('sender', tx['sender']),('recipient', tx['recipient']),('amount', tx['amount'])])
+           updated_transactions.append(updated_transaction) 
+        open_transactions = updated_transactions
 
 # execute inmediatelly the load_data when we run the script
 load_data()
@@ -33,9 +53,9 @@ load_data()
 # save transactions data in a file
 def save_data():
     with open('blockchain.txt', mode='w') as f:
-        f.write(str(blockchain))
+        f.write(json.dumps(blockchain))
         f.write('\n')
-        f.write(str(open_transactions))
+        f.write(json.dumps(open_transactions))
 
 # Extraer el ultimo valor que tiene el blockchain
 # En una lista utilizando -1 accedes al valor que este más a la izquierda de la lista/array y no da error si esta vacio 
@@ -47,12 +67,6 @@ def get_last_blockchain_value():
 # ----------------------------------------------------
 # Add transaction appending to the open_transactions
 def add_transaction(recipient, sender=owner, amount=1.0):
-    # transaction = {
-    #     'sender': sender, 
-    #     'recipient': recipient, 
-    #     'amount': amount
-    # }
-
     # library to create a dictionary with an order usin list of tuples (key-value)
     transaction = OrderedDict([('sender', sender),('recipient', recipient),('amount', amount)])
     if verify_transaction(transaction):
@@ -122,11 +136,6 @@ def mine_block():
     # give a new proof value to the current transaction
     proof = proof_of_work()
     print(hashed_block)
-    # reward_transaction = {
-    #     'sender': 'MINING',
-    #     'recipient': owner,
-    #     'amount': MINING_REWARD
-    # }
     reward_transaction = OrderedDict([('sender', 'MINING'),('recipient', owner),('amount', MINING_REWARD)])
     # create a copy of open transactions to dont modified when we append the reward transaction
     copied_transactions = open_transactions[:]
@@ -138,7 +147,6 @@ def mine_block():
         'proof': proof
     }
     blockchain.append(block)
-    save_data()
     return True
 
 # ----------------------------------------------------
@@ -216,6 +224,7 @@ while waiting_for_input:
     elif user_choice == '3':
         if mine_block():
             open_transactions = []
+            save_data()
     elif user_choice == '4':
         print_participants()
     elif user_choice == '5':
