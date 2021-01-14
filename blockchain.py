@@ -4,6 +4,7 @@ import hashlib
 import json
 
 from hash_util import hash_string_256, create_hash_block
+from block import Block
 
 MINING_REWARD = 10
 
@@ -24,13 +25,22 @@ def load_data():
             blockchain = json.loads(file_content[0][:-1])
             updated_blockchain = []
             for block in blockchain:
-                updated_block = {
-                    'previous_hash': block['previous_hash'], 
-                    'index': block['index'], 
-                    'proof':block['proof'],
-                    'transactions': [OrderedDict(
+                converted_transactions = [OrderedDict(
                         [('sender', tx['sender']),('recipient', tx['recipient']),('amount', tx['amount'])]) for tx in block['transactions']]
-                }
+                updated_block = Block(
+                    block['index'],
+                    block['previous_hash'],
+                    converted_transactions,
+                    block['proof'],
+                    block['timestamp'],
+                    )
+                # updated_block = {
+                #     'previous_hash': block['previous_hash'], 
+                #     'index': block['index'], 
+                #     'proof':block['proof'],
+                #     'transactions': [OrderedDict(
+                #         [('sender', tx['sender']),('recipient', tx['recipient']),('amount', tx['amount'])]) for tx in block['transactions']]
+                # }
                 updated_blockchain.append(updated_block) 
             blockchain = updated_blockchain
             # open_transactions logic
@@ -42,12 +52,7 @@ def load_data():
                 updated_transactions.append(updated_transaction) 
             open_transactions = updated_transactions
     except (IOError, IndexError):
-        genesis_block = {
-            'previous_hash': '', 
-            'index': 0, 
-            'transactions': [],
-            'proof': 100
-        }
+        genesis_block = Block(0, '', [], 100, 0)
         blockchain = [genesis_block]
         open_transactions = []
     finally:
@@ -60,7 +65,9 @@ load_data()
 def save_data():
     try:
         with open('blockchain.txt', mode='w') as f:
-            f.write(json.dumps(blockchain))
+            # save the block object like a dictionary
+            saveable_chain = [block.__dict__ for block in blockchain]
+            f.write(json.dumps(saveable_chain))
             f.write('\n')
             f.write(json.dumps(open_transactions)) 
     except IOError:
@@ -119,7 +126,7 @@ def proof_of_work():
 # function to calculate the balance amount of a participant
 def get_balance(participant):
     # nested list comprehensions to get the transactions where the participant is the sender
-    tx_sender = [[tx['amount'] for tx in block['transactions'] if tx['sender'] == participant] for block in blockchain]
+    tx_sender = [[tx['amount'] for tx in block.transactions if tx['sender'] == participant] for block in blockchain]
     open_tx_sender = [tx['amount'] for tx in open_transactions if tx['sender'] == participant]
     tx_sender.append(open_tx_sender)
     amount_sent = reduce(lambda tx_sum, tx_amt: tx_sum + sum(tx_amt) if len(tx_amt) > 0 else tx_sum + 0, tx_sender, 0)
@@ -128,12 +135,13 @@ def get_balance(participant):
     #     if len(tx) > 0:
     #         amount_sent += tx[0]
     # nested list comprehensions to get the transactions where the participant is the recipient
-    tx_recipient = [[tx['amount'] for tx in block['transactions'] if tx['recipient'] == participant ] for block in blockchain]
+    tx_recipient = [[tx['amount'] for tx in block.transactions if tx['recipient'] == participant ] for block in blockchain]
     amount_received = reduce(lambda tx_sum, tx_amt: tx_sum + sum(tx_amt) if len(tx_amt) > 0 else tx_sum + 0, tx_recipient, 0)
     # amount_received = 0
     # for tx in tx_recipient:
     #     if len(tx) > 0:
     #         amount_received += tx[0]
+    # Return the total balance
     return amount_received - amount_sent
 
 # ----------------------------------------------------
@@ -149,12 +157,7 @@ def mine_block():
     # create a copy of open transactions to dont modified when we append the reward transaction
     copied_transactions = open_transactions[:]
     copied_transactions.append(reward_transaction)
-    block = {
-        'previous_hash': hashed_block, 
-        'index': len(blockchain), 
-        'transactions': copied_transactions,
-        'proof': proof
-    }
+    block = Block(len(blockchain), hashed_block, copied_transactions, proof)
     blockchain.append(block)
     return True
 
@@ -192,10 +195,10 @@ def verify_chain():
         if index == 0:
             continue
         # compara el valor del previous_hash de un block con la creación de un hash_block del bloque anterior
-        if block['previous_hash'] != create_hash_block(blockchain[index - 1]):
+        if block.previous_hash != create_hash_block(blockchain[index - 1]):
             return False
         # comprobar que es un valid proof quitando antes del bloque el ultimo valor que corresponde a las reward transaction    
-        if not valid_proof(block['transactions'][:-1], block['previous_hash'], block['proof']):
+        if not valid_proof(block.transactions[:-1], block.previous_hash, block.proof):
             print('Proof of work is invalid!')
             return False
     return True    
@@ -217,7 +220,6 @@ while waiting_for_input:
     print('3: Mine a new block')
     print('4: Output the participants')
     print('5: Check transaction validity')
-    print('e: Manipulate a blockchain block')
     print('q: Finish the transactions')
     user_choice = get_user_choice()
     if user_choice == '1':  
@@ -241,9 +243,6 @@ while waiting_for_input:
             print('All transactions are valid!')
         else:
             print('There are invalid transactions')
-    elif user_choice == 'e':
-        if len(blockchain) >= 1:
-            blockchain[0] = {'previous_hash': '', 'index': 0, 'transactions': [{'sender':'Chris', 'recipient':'Tom', 'amount':10.5}]}
     elif user_choice == 'q': 
         waiting_for_input = False
     else:

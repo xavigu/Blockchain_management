@@ -8,6 +8,7 @@ def hash_string_256(string):
 # function to create hashed block
 def create_hash_block(block):
     # hash the block and convert to string with json library and encode to utf-8 and hexdigest to have normal characters
-    # Because a dictionary is unordered, we order the keys before convert the block to string
-    hash_block = hash_string_256(json.dumps(block, sort_keys=True).encode())
+    # Convert the block object to a copy of a dictionary
+    hashable_block = block.__dict__.copy()
+    hash_block = hash_string_256(json.dumps(hashable_block, sort_keys=True).encode())
     return hash_block
