@@ -11,13 +11,14 @@ from verification import Verification
 MINING_REWARD = 10
 
 class Blockchain:
-    def __init__(self):
+    def __init__(self, hosting_node_id):
         # Our starting block for the blockchain
         genesis_block = Block(0, '', [], 100, 0)
         self.blockchain = [genesis_block]
         self.open_transactions = []
         # execute inmediatelly the load_data when we run the script
         self.load_data()
+        self.hosting_node = hosting_node_id
 
     # load transactions data of a file
     def load_data(self):
@@ -78,7 +79,8 @@ class Blockchain:
 
     # ----------------------------------------------------
     # function to calculate the balance amount of a participant
-    def get_balance(self, participant):
+    def get_balance(self):
+        participant = self.hosting_node
         # nested list comprehensions to get the transactions where the participant is the sender
         tx_sender = [[tx.amount for tx in block.transactions if tx.sender == participant] for block in self.blockchain]
         open_tx_sender = [tx.amount for tx in self.open_transactions if tx.sender == participant]
@@ -118,19 +120,21 @@ class Blockchain:
 
     # ----------------------------------------------------
     #  create a block with the open_transactions and add it to the blockchain
-    def mine_block(self, node):
+    def mine_block(self):
         last_block = self.blockchain[-1]
         # el previous_hash será el ultimo block del blockchain pasado a string y separado los valores del dictionary por '-'
         hashed_block = create_hash_block(last_block)
         # give a new proof value to the current transaction
         proof = self.proof_of_work()
         print(hashed_block)
-        reward_transaction = Transaction('MINING', node, MINING_REWARD)
+        reward_transaction = Transaction('MINING', self.hosting_node, MINING_REWARD)
         # create a copy of open transactions to dont modified when we append the reward transaction
         copied_transactions = self.open_transactions[:]
         copied_transactions.append(reward_transaction)
         block = Block(len(self.blockchain), hashed_block, copied_transactions, proof)
         self.blockchain.append(block)
+        self.open_transactions = []
+        self.save_data()
         return True
 
 

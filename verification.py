@@ -13,7 +13,7 @@ class Verification:
     # ----------------------------------------------------
     # Function to verify if a transaction is possible
     def verify_transaction(self, transaction, get_balance):
-        sender_balance = get_balance(transaction.sender)
+        sender_balance = get_balance()
         # return true if the sender_balance is greater than the transaction amount otherwise false
         return sender_balance >= transaction.amount
 
