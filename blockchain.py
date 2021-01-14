@@ -12,8 +12,6 @@ MINING_REWARD = 10
 blockchain = []
 open_transactions = []
 owner = 'Javier'
-# create a set to the participants of the transactions
-participants = {'Javier'}
 
 # load transactions data of a file
 def load_data():
@@ -217,8 +215,7 @@ while waiting_for_input:
     print('1: Add a new transaction value')
     print('2: Output the blockchain blocks')
     print('3: Mine a new block')
-    print('4: Output the participants')
-    print('5: Check transaction validity')
+    print('4: Check transaction validity')
     print('q: Finish the transactions')
     user_choice = get_user_choice()
     if user_choice == '1':  
@@ -236,8 +233,6 @@ while waiting_for_input:
             open_transactions = []
             save_data()
     elif user_choice == '4':
-        print_participants()
-    elif user_choice == '5':
         if verify_transactions():
             print('All transactions are valid!')
         else:
