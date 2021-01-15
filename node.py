@@ -59,8 +59,7 @@ class Node:
           elif user_choice == '3':
               self.blockchain.mine_block()
           elif user_choice == '4':
-              verifier = Verification()
-              if verifier.verify_transactions(self.blockchain.open_transactions, self.blockchain.get_balance):
+              if Verification.verify_transactions(self.blockchain.open_transactions, self.blockchain.get_balance):
                   print('All transactions are valid!')
               else:
                   print('There are invalid transactions')
@@ -68,8 +67,7 @@ class Node:
               waiting_for_input = False
           else:
               print('Input was invalid!!')
-          verifier = Verification()
-          if not verifier.verify_chain(self.blockchain.blockchain):
+          if not Verification.verify_chain(self.blockchain.blockchain):
               self.print_blockchain_blocks()
               print('The blockchain was modified, Invalid!')
               break
