@@ -1,3 +1,5 @@
+"""Provides hash generator helper methods"""
+
 import hashlib
 import json
 

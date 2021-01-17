@@ -3,10 +3,10 @@ from collections import OrderedDict
 import hashlib
 import json
 
-from hash_util import create_hash_block
+from utils.hash_util import create_hash_block
+from utils.verification import Verification
 from block import Block
 from transaction import Transaction
-from verification import Verification
 
 MINING_REWARD = 10
 

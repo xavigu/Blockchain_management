@@ -1,4 +1,6 @@
-from hash_util import hash_string_256, create_hash_block
+"""Provides verification helper methods"""
+
+from utils.hash_util import hash_string_256, create_hash_block
 
 class Verification:
     # ----------------------------------------------------
