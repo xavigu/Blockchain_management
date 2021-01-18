@@ -9,7 +9,9 @@ class Node:
         # self.id = str(uuid4())
         # self.id = 'Javier'
         self.wallet = Wallet()
-        self.blockchain = None
+        self.wallet.create_keys()
+        self.blockchain = Blockchain(self.wallet.public_key)
+        # self.blockchain = None
 
 
     # Functions to get the inputs that the user write
@@ -46,8 +48,9 @@ class Node:
           print('2: Output the blockchain blocks')
           print('3: Mine a new block')
           print('4: Check transaction validity')
-          print('5: Create wallet')
+          print('5: Create new wallet')
           print('6: Load Wallet')
+          print('7: Save wallet keys')
           print('q: Finish the transactions')
           user_choice = self.get_user_choice()
           if user_choice == '1':  
@@ -72,7 +75,10 @@ class Node:
               self.wallet.create_keys()
               self.blockchain = Blockchain(self.wallet.public_key)
           elif user_choice == '6':
-              pass
+              self.wallet.load_keys()
+              self.blockchain = Blockchain(self.wallet.public_key)
+          elif user_choice == '7':
+              self.wallet.save_keys()
           elif user_choice == 'q': 
               waiting_for_input = False
           else:
