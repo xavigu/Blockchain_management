@@ -7,6 +7,7 @@ from utils.hash_util import create_hash_block
 from utils.verification import Verification
 from block import Block
 from transaction import Transaction
+from wallet import Wallet
 
 MINING_REWARD = 10
 
@@ -115,9 +116,11 @@ class Blockchain:
     # ----------------------------------------------------
     # Add transaction appending to the open_transactions
     def add_transaction(self, recipient, sender, signature, amount=1.0):
-        print('signature: ', signature)
-        transaction = Transaction(sender, recipient, signature, amount)
         if self.hosting_node == None:
+            return False
+        # Create transaction class object
+        transaction = Transaction(sender, recipient, signature, amount)
+        if not Wallet.verify_transaction(transaction):
             return False
         if Verification.verify_transaction(transaction, self.get_balance):
             self.__open_transactions.append(transaction)
@@ -141,6 +144,10 @@ class Blockchain:
         copied_transactions = self.__open_transactions[:]
         copied_transactions.append(reward_transaction)
         block = Block(len(self.__blockchain), hashed_block, copied_transactions, proof)
+        # Verify all transactions of the block are signed correctly
+        for tx in block.transactions:
+            if not Wallet.verify_transaction(tx):
+                return False
         self.__blockchain.append(block)
         self.__open_transactions = []
         self.save_data()
