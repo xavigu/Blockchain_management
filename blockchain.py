@@ -36,7 +36,7 @@ class Blockchain:
                 updated_blockchain = []
                 for block in blockchain:
                     converted_transactions = [Transaction(
-                        tx['sender'], tx['recipient'], tx['amount']) for tx in block['transactions']]
+                        tx['sender'], tx['recipient'], tx['signature'], tx['amount']) for tx in block['transactions']]
                     updated_block = Block(
                         block['index'], block['previous_hash'], converted_transactions, block['proof'], block['timestamp'])
                     updated_blockchain.append(updated_block) 
@@ -46,7 +46,7 @@ class Blockchain:
                 updated_transactions = []
                 for tx in open_transactions:
                     updated_transaction = Transaction(
-                        tx['sender'], tx['recipient'], tx['amount']) 
+                        tx['sender'], tx['recipient'], tx['signature'], tx['amount']) 
                     updated_transactions.append(updated_transaction) 
                 self.__open_transactions = updated_transactions
         except (IOError, IndexError):
@@ -114,8 +114,9 @@ class Blockchain:
 
     # ----------------------------------------------------
     # Add transaction appending to the open_transactions
-    def add_transaction(self, recipient, sender, amount=1.0):
-        transaction = Transaction(sender, recipient, amount)
+    def add_transaction(self, recipient, sender, signature, amount=1.0):
+        print('signature: ', signature)
+        transaction = Transaction(sender, recipient, signature, amount)
         if self.hosting_node == None:
             return False
         if Verification.verify_transaction(transaction, self.get_balance):
@@ -135,7 +136,7 @@ class Blockchain:
         # give a new proof value to the current transaction
         proof = self.proof_of_work()
         print(hashed_block)
-        reward_transaction = Transaction('MINING', self.hosting_node, MINING_REWARD)
+        reward_transaction = Transaction('MINING', self.hosting_node, '', MINING_REWARD)
         # create a copy of open transactions to dont modified when we append the reward transaction
         copied_transactions = self.__open_transactions[:]
         copied_transactions.append(reward_transaction)
