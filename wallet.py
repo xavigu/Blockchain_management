@@ -56,8 +56,6 @@ class Wallet:
     @staticmethod
     def verify_transaction(transaction):
         try:
-            if transaction.sender == 'MINING':
-                return True
             public_key = RSA.import_key(binascii.unhexlify(transaction.sender))
             verifier = pkcs1_15.new(public_key)
             h = SHA256.new((str(transaction.sender) + str(transaction.recipient) + str(transaction.amount)).encode('utf8'))

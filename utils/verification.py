@@ -1,6 +1,7 @@
 """Provides verification helper methods"""
 
 from utils.hash_util import hash_string_256, create_hash_block
+from wallet import Wallet
 
 class Verification:
     # ----------------------------------------------------
@@ -16,10 +17,13 @@ class Verification:
     # ----------------------------------------------------
     # Function to verify if a transaction is possible
     @staticmethod
-    def verify_transaction(transaction, get_balance):
-        sender_balance = get_balance()
-        # return true if the sender_balance is greater than the transaction amount otherwise false
-        return sender_balance >= transaction.amount
+    def verify_transaction(transaction, get_balance, check_funds = True):
+        if check_funds:
+            sender_balance = get_balance()
+            # return true if the sender_balance is greater than the transaction amount otherwise false
+            return sender_balance >= transaction.amount and Wallet.verify_transaction(transaction)
+        else:
+            return Wallet.verify_transaction(transaction)
 
     # ----------------------------------------------------
     # Comprueba que el primer valor de la segunda blockchain coincide con el valor de la blockchain previa
@@ -43,4 +47,4 @@ class Verification:
     # Verify all transactions are valid
     @classmethod
     def verify_transactions(cls, open_transactions, get_balance):
-        return all([cls.verify_transaction(tx, get_balance) for tx in open_transactions] )   
+        return all([cls.verify_transaction(tx, get_balance, False) for tx in open_transactions] )   

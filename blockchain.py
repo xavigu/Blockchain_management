@@ -120,8 +120,6 @@ class Blockchain:
             return False
         # Create transaction class object
         transaction = Transaction(sender, recipient, signature, amount)
-        if not Wallet.verify_transaction(transaction):
-            return False
         if Verification.verify_transaction(transaction, self.get_balance):
             self.__open_transactions.append(transaction)
             self.save_data()
@@ -142,12 +140,12 @@ class Blockchain:
         reward_transaction = Transaction('MINING', self.hosting_node, '', MINING_REWARD)
         # create a copy of open transactions to dont modified when we append the reward transaction
         copied_transactions = self.__open_transactions[:]
-        copied_transactions.append(reward_transaction)
-        block = Block(len(self.__blockchain), hashed_block, copied_transactions, proof)
         # Verify all transactions of the block are signed correctly
-        for tx in block.transactions:
+        for tx in copied_transactions:
             if not Wallet.verify_transaction(tx):
                 return False
+        copied_transactions.append(reward_transaction)
+        block = Block(len(self.__blockchain), hashed_block, copied_transactions, proof)
         self.__blockchain.append(block)
         self.__open_transactions = []
         self.save_data()
