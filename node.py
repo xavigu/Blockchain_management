@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 # cors allows the clients running on the same server can access this server
 from flask_cors import CORS
 
@@ -10,6 +10,10 @@ app = Flask(__name__)
 wallet = Wallet()
 blockchain = Blockchain(wallet.public_key)
 CORS(app)
+
+@app.route('/', methods=['GET'])
+def get_ui():
+    return send_from_directory('ui', 'node.html')
 
 @app.route('/wallet', methods=['POST'])
 def create_keys():
@@ -61,10 +65,6 @@ def get_balance():
       }
       return jsonify(response), 500         
 
-# decorator to run the function when we pass the endpoint of the argument and the CRUD methods that support (app is like the variable where we instantiate the Flask)
-@app.route('/', methods=['GET'])
-def get_ui():
-    return 'works!'
 
 @app.route('/transaction', methods=['POST'])
 def add_transaction():
