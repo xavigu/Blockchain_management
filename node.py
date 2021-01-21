@@ -24,6 +24,25 @@ def get_chain():
       dict_block['transactions'] = [tx.__dict__ for tx in dict_block['transactions']]
     return jsonify(dict_blockchain), 200
 
+@app.route('/mine', methods=['POST'])
+def mine():
+    block = blockchain.mine_block()
+    if block != None:
+        dict_block = block.__dict__.copy()
+        dict_block['transactions'] = [tx.__dict__ for tx in dict_block['transactions']]
+        response = {
+            'message': 'Adding a block successfully',
+            'block': dict_block
+        }
+        return jsonify(response), 201 
+    else:
+        response = {
+            'message': 'Adding a block failed',
+            'wallet_set_up': wallet.public_key != None,
+        }
+        return jsonify(response), 500 
+
+
 if __name__ == '__main__':
     # run take de IP on which we want to run and the port to listen
     app.run(host='0.0.0.0', port=5000)

@@ -130,7 +130,7 @@ class Blockchain:
     #  create a block with the open_transactions and add it to the blockchain
     def mine_block(self):
         if self.hosting_node == None:
-            return False
+            return None
         last_block = self.__blockchain[-1]
         # el previous_hash será el ultimo block del blockchain pasado a string y separado los valores del dictionary por '-'
         hashed_block = create_hash_block(last_block)
@@ -143,12 +143,12 @@ class Blockchain:
         # Verify all transactions of the block are signed correctly
         for tx in copied_transactions:
             if not Wallet.verify_transaction(tx):
-                return False
+                return None
         copied_transactions.append(reward_transaction)
         block = Block(len(self.__blockchain), hashed_block, copied_transactions, proof)
         self.__blockchain.append(block)
         self.__open_transactions = []
         self.save_data()
-        return True
+        return block
 
 
