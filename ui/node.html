@@ -196,48 +196,8 @@
         new Vue({
             el: '#app',
             data: {
-                blockchain: [
-                    {
-                        previous_hash: 'fawsqwar2', index: 0, transactions: [
-                            {
-                                sender: 'fsdf23',
-                                recipient: 'fadwfs314',
-                                amount: 5.5
-                            },
-                            {
-                                sender: 'fssfsddf23',
-                                recipient: 'fadewasfwfs314',
-                                amount: 15.5
-                            }
-                        ]
-                    },
-                    {
-                        previous_hash: 'awdsf14', index: 1, transactions: [
-                            {
-                                sender: 'afe',
-                                recipient: 'fadwe322fs314',
-                                amount: 1.5
-                            },
-                            {
-                                sender: 'fssddf23',
-                                recipient: 'fadesfwfs314',
-                                amount: 4.5
-                            }
-                        ]
-                    }
-                ],
-                openTransactions: [
-                    {
-                        sender: '23r32r3fsas',
-                        recipient: 'feadsf25',
-                        amount: 5.9
-                    },
-                    {
-                        sender: '23r23r2ra3fsas',
-                        recipient: 'sdfsfa',
-                        amount: 1.5
-                    }
-                ],
+                blockchain: [],
+                openTransactions: [],
                 wallet: null,
                 view: 'chain',
                 walletLoading: false,
@@ -263,16 +223,19 @@
             },
             methods: {
                 onCreateWallet: function () {
-                    // Send Http request to create a new wallet (and return keys)
-                    if (Math.random() > 0.5) {
-                        this.error = null
-                        this.success = 'Successfully stored transaction!';
-                        this.wallet = { private_key: 'fsde2523tfasg234twfg24qafew', public_key: '532fsdarf23rf' };
-                    } else {
-                        this.success = null;
-                        this.error = 'Something went wrong!';
-                        this.wallet = null;
-                    }
+                    var vm = this;
+                    this.dataLoading = true;
+                    // Load blockchain data
+                    axios.post('/wallet').then((response) => {
+                        vm.error = null;
+                        vm.success = 'Created wallet! Public Key: ' + response.data.public_key + ', Private Key: ' + response.data.private_key;
+                        vm.dataLoading = false;
+                    })
+                    .catch((error)=> {
+                        vm.success = null;
+                        vm.dataLoading = false;
+                        vm.error = error.data.message;
+                    })
                 },
                 onLoadWallet: function () {
                     // Send Http request to load an existing wallet (from a file on the server)
@@ -309,21 +272,29 @@
                 },
                 onLoadData: function () {
                     if (this.view === 'chain') {
+                        var vm = this;
+                        vm.dataLoading = true;
                         // Load blockchain data
-                        if (Math.random() > 0.5) {
-                            this.error = null
-                        } else {
-                            this.success = null;
-                            this.error = 'Something went wrong!'
-                        }
+                        axios.get('/chain').then((response) =>{
+                            vm.blockchain = response.data;
+                            vm.dataLoading = false;
+                        })
+                        .catch((error)=> {
+                            vm.dataLoading = false;
+                            vm.error = 'Something went wrong'
+                        })
                     } else {
+                        var vm = this;
+                        vm.dataLoading = true;
                         // Load transaction data
-                        if (Math.random() > 0.5) {
-                            this.error = null
-                        } else {
-                            this.success = null;
-                            this.error = 'Something went wrong!'
-                        }
+                        axios.get('/transactions').then((response) => {
+                            vm.openTransactions = response.data;
+                            vm.dataLoading = false;
+                        }) 
+                        .catch((error)=> {
+                            vm.dataLoading = false;
+                            vm.error = 'Something went wrong'
+                        })                                               
                     }
                 }
             }
