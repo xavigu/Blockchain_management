@@ -112,6 +112,12 @@ def add_transaction():
         }
         return jsonify(response), 500
 
+@app.route('/transactions', methods=['GET'])
+def get_open_transactions():
+    open_transactions = blockchain.get_open_transactions()
+    dict_transactions = [tx.__dict__ for tx in open_transactions]
+    return jsonify(dict_transactions), 200 
+
 
 @app.route('/chain', methods=['GET'])
 def get_chain():
