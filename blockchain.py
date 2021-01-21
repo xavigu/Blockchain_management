@@ -86,6 +86,8 @@ class Blockchain:
     # ----------------------------------------------------
     # function to calculate the balance amount of a participant
     def get_balance(self):
+        if self.hosting_node == None:
+            return None        
         participant = self.hosting_node
         # nested list comprehensions to get the transactions where the participant is the sender
         tx_sender = [[tx.amount for tx in block.transactions if tx.sender == participant] for block in self.__blockchain]
