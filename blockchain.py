@@ -17,11 +17,11 @@ class Blockchain:
         genesis_block = Block(0, '', [], 100, 0)
         self.__blockchain = [genesis_block]
         self.__open_transactions = []
-        # execute inmediatelly the load_data when we run the script
-        self.load_data()
         self.hosting_node = hosting_node_id
         # set where we storage the nodes by participant
         self.__peer_nodes = set()
+        # execute inmediatelly the load_data when we run the script
+        self.load_data()
 
     def get_blockchain(self):
         return self.__blockchain[:]

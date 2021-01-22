@@ -167,6 +167,21 @@ def add_node():
     }
     return jsonify(response), 201
 
+# when you use delete method you need call replacing the <node_url> with the peer_node you want delete
+@app.route('/node/<node_url>', methods=['DELETE'])
+def remove_node(node_url):
+    if node_url == '' or node_url == None:
+        response = {
+          'message': 'No Node found'
+        }
+        return jsonify(response), 400          
+    blockchain.remove_peer_node(node_url)
+    response = {
+      'message': 'Node removed successfully',
+      'all_nodes': blockchain.get_peer_nodes()
+    }
+    return jsonify(response), 200
+
 
 if __name__ == '__main__':
     # run take de IP on which we want to run and the port to listen
