@@ -20,6 +20,8 @@ class Blockchain:
         # execute inmediatelly the load_data when we run the script
         self.load_data()
         self.hosting_node = hosting_node_id
+        # set where we storage the nodes by participant
+        self.__peer_nodes = set()
 
     def get_blockchain(self):
         return self.__blockchain[:]
@@ -43,13 +45,16 @@ class Blockchain:
                     updated_blockchain.append(updated_block) 
                 self.__blockchain = updated_blockchain
                 # open_transactions logic
-                open_transactions = json.loads(file_content[1])
+                open_transactions = json.loads(file_content[1][:-1])
                 updated_transactions = []
                 for tx in open_transactions:
                     updated_transaction = Transaction(
                         tx['sender'], tx['recipient'], tx['signature'], tx['amount']) 
                     updated_transactions.append(updated_transaction) 
                 self.__open_transactions = updated_transactions
+                # peer_nodes logic
+                peer_nodes = json.loads(file_content[2])
+                self.__peer_nodes = set(peer_nodes)
         except (IOError, IndexError):
            print('Handled exception...')
         finally:
@@ -68,7 +73,10 @@ class Blockchain:
                 f.write(json.dumps(saveable_chain))
                 f.write('\n')
                 saveable_transactions = [tx.__dict__ for tx in self.__open_transactions]
-                f.write(json.dumps(saveable_transactions)) 
+                f.write(json.dumps(saveable_transactions))
+                # save the connected nodes
+                f.write('\n')
+                f.write(json.dumps(list(self.__peer_nodes)))                
         except IOError:
             print('Saving failed')
 
@@ -153,4 +161,16 @@ class Blockchain:
         self.save_data()
         return block
 
+    def add_peer_node(self, node):
+        """Adds a new node to the peer node set.
+
+        Arguments:
+            :node: The node URL which should be added.
+        """    
+        self.__peer_nodes(node)   
+        self.save_data()
+
+    def remove_peer_node(self, node):
+        self.__peer_nodes.discard(node)   
+        self.save_data()
 
