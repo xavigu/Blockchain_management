@@ -7,8 +7,6 @@ from blockchain import Blockchain
 
 # with the name argument you tell flask in which context it runs
 app = Flask(__name__)
-wallet = Wallet()
-blockchain = Blockchain(wallet.public_key)
 CORS(app)
 
 @app.route('/', methods=['GET'])
@@ -24,10 +22,11 @@ def create_keys():
     wallet.create_keys()
     if wallet.save_keys():
         global blockchain
-        blockchain = Blockchain(wallet.public_key)
+        blockchain = Blockchain(wallet.public_key, port)
         response = {
             'public_key': wallet.public_key,
-            'private_key': wallet.private_key
+            'private_key': wallet.private_key,
+            'funds': blockchain.get_balance()
         }
         return jsonify(response), 201
     else:
@@ -40,7 +39,7 @@ def create_keys():
 def load_keys():
     if wallet.load_keys():
         global blockchain
-        blockchain = Blockchain(wallet.public_key)
+        blockchain = Blockchain(wallet.public_key, port)
         response = {
             'public_key': wallet.public_key,
             'private_key': wallet.private_key,
@@ -196,7 +195,18 @@ def remove_node(node_url):
 
 
 if __name__ == '__main__':
-    # run take de IP on which we want to run and the port to listen
-    app.run(host='0.0.0.0', port=5000)
+    # library to pass arguments when you run the server
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+    # add the arguments that you can pass when you run the server and add default value
+    parser.add_argument('-p', '--port', type=int, default=5000)
+    # catch the args in a variable
+    args = parser.parse_args()
+    # get the port value in the args if you dont pass any value it gets 5000 by default
+    port = args.port
+    # the variables is available globally in the file because this part runs first
+    wallet = Wallet(port)
+    blockchain = Blockchain(wallet.public_key, port)
+    app.run(host='0.0.0.0', port=port)
 
   
