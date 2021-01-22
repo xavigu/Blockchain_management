@@ -146,6 +146,14 @@ def mine():
         }
         return jsonify(response), 500 
 
+@app.route('/nodes', methods=['GET'])
+def get_nodes():
+    nodes = blockchain.get_peer_nodes()
+    response = {
+      'all_nodes': nodes
+    }
+    return jsonify(response), 200
+
 @app.route('/node', methods=['POST'])
 def add_node():
     values = request.get_json()
