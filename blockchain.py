@@ -167,10 +167,12 @@ class Blockchain:
         Arguments:
             :node: The node URL which should be added.
         """    
-        self.__peer_nodes(node)   
+        self.__peer_nodes.add(node)   
         self.save_data()
 
     def remove_peer_node(self, node):
         self.__peer_nodes.discard(node)   
         self.save_data()
 
+    def get_peer_nodes(self):
+        return list(self.__peer_nodes)
