@@ -95,10 +95,13 @@ class Blockchain:
 
     # ----------------------------------------------------
     # function to calculate the balance amount of a participant
-    def get_balance(self):
-        if self.public_key == None:
-            return None        
-        participant = self.public_key
+    def get_balance(self, sender=None):
+        if sender == None:
+            if self.public_key == None:
+                return None        
+            participant = self.public_key
+        else:
+            participant = sender
         # nested list comprehensions to get the transactions where the participant is the sender
         tx_sender = [[tx.amount for tx in block.transactions if tx.sender == participant] for block in self.__blockchain]
         open_tx_sender = [tx.amount for tx in self.__open_transactions if tx.sender == participant]
@@ -127,7 +130,7 @@ class Blockchain:
 
     # ----------------------------------------------------
     # Add transaction appending to the open_transactions
-    def add_transaction(self, recipient, sender, signature, amount=1.0):
+    def add_transaction(self, recipient, sender, signature, amount=1.0, is_receiving = False):
         if self.public_key == None:
             return False
         # Create transaction class object
@@ -135,16 +138,17 @@ class Blockchain:
         if Verification.verify_transaction(transaction, self.get_balance):
             self.__open_transactions.append(transaction)
             self.save_data()
-            # send to all nodes the transaction added
-            for node in self.__peer_nodes:
-                url = 'http://{}/broadcast-transaction'.format(node)
-                try:
-                    response = requests.post(url, json={'sender': sender, 'recipient': recipient, 'amount'= amount, 'signature': signature})
-                    if response.status_code = 400 or response.status_code == 500:
-                        print('Transaction declined, needs resolving')
-                        return False
-                except requests.exceptions.ConnectionError:
-                    continue
+            # send to all nodes the transaction added if there is not the direct receiving node
+            if not is_receiving:
+                for node in self.__peer_nodes:
+                    url = 'http://{}/broadcast-transaction'.format(node)
+                    try:
+                        response = requests.post(url, json={'sender': sender, 'recipient': recipient, 'amount': amount, 'signature': signature})
+                        if response.status_code == 400 or response.status_code == 500:
+                            print('Transaction declined, needs resolving')
+                            return False
+                    except requests.exceptions.ConnectionError:
+                        continue
             return True
         return False
 
