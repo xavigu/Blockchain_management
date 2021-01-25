@@ -22,6 +22,7 @@ class Blockchain:
         # set where we storage the nodes by participant
         self.__peer_nodes = set()
         self.node_id = node_id
+        self.resolve_conflicts = False
         # execute inmediatelly the load_data when we run the script
         self.load_data()
 
@@ -185,6 +186,8 @@ class Blockchain:
                 })
                 if response.status_code == 400 or response.status_code == 500:
                     print('Block declined, needs resolving')
+                if response.status_code == 409:
+                    self.resolve_conflicts = True
             except requests.exceptions.ConnectionError:
                 continue
         return block
