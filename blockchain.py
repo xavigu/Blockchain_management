@@ -131,8 +131,8 @@ class Blockchain:
     # ----------------------------------------------------
     # Add transaction appending to the open_transactions
     def add_transaction(self, recipient, sender, signature, amount=1.0, is_receiving = False):
-        if self.public_key == None:
-            return False
+        # if self.public_key == None:
+        #     return False
         # Create transaction class object
         transaction = Transaction(sender, recipient, signature, amount)
         if Verification.verify_transaction(transaction, self.get_balance):
