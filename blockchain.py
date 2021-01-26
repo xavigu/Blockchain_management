@@ -26,6 +26,16 @@ class Blockchain:
         # execute inmediatelly the load_data when we run the script
         self.load_data()
 
+    # This turns the blockchain attribute into a property with a getter (the method below) and a setter (@chain.setter)
+    @property
+    def chain(self):
+        return self.__blockchain[:]
+
+    # The setter for the blockchain property
+    @chain.setter
+    def chain(self, val):
+        self.__blockchain = val    
+
     def get_blockchain(self):
         return self.__blockchain[:]
 
@@ -213,6 +223,39 @@ class Blockchain:
                         print('Item was already removed')
         self.save_data()       
         return True
+
+    def resolve(self):
+        winner_chain = self.chain
+        replace = False
+        # check which peer_nodes have which blockchain (peer_nodes storage in the blockchain.txt)
+        for node in self.__peer_nodes:
+            url = 'http://{}/chain'.format(node)
+            try:
+                response = requests.get(url)
+                # extract json like a dictionary
+                node_chain = response.json()
+                # transform the chain into a list of block objects and the transactions inside into a list of transaction objects
+                node_chain = [Block(
+                    block['index'], 
+                    block['previous_hash'], 
+                    [Transaction(tx['sender'], tx['recipient'], tx['signature'], tx['amount']) for tx in block['transactions']], 
+                    block['proof'], 
+                    block['timestamp']) for block in node_chain]
+                # compare local blockchain with the blockchain of each peer_node storaged
+                node_chain_length = len(node_chain)
+                local_chain_length = len(winner_chain)
+                if node_chain_length > local_chain_length and Verification.verify_chain(node_chain):
+                    winner_chain = node_chain
+                    replace = True
+            # except can occurs when a peer_node is not connected    
+            except requests.exceptions.ConnectionError:
+                continue 
+        self.resolve_conflicts = False
+        self.chain = winner_chain
+        if replace:
+            self.__open_transactions = []
+        self.save_data()
+        return replace
 
     def add_peer_node(self, node):
         """Adds a new node to the peer node set.
