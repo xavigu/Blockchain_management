@@ -2,7 +2,7 @@ This project was developed with [Python](https://www.python.org/) (python versio
 
 ## Introduction
 
-The goal of this project is to simulate the logic behind building your own Blockchain for cryptocurrency traffic and how different nodes(servers) communicate to send transactions and always have the blockchain updated in the different nodes that are connected.
+The goal of this project is to simulate the logic behind building your own Blockchain for cryptocurrency traffic and how different nodes(servers) communicate to send transactions and always have the same blockchain updated in the different nodes that are connected.
 
 ### How to run the project (Windows)
 
